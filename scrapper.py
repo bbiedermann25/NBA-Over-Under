@@ -1,7 +1,8 @@
-import requests
-import datetime
+import requests, datetime, boto3
 from bs4 import BeautifulSoup
 import pandas as pd
+from io import StringIO
+
 
 data = pd.DataFrame()
 start_date = datetime.datetime(2020, 12, 22)
@@ -88,7 +89,19 @@ while start_date <= end_date:
     start_date += datetime.timedelta(days=1)
     url = 'https://www.covers.com/sports/NBA/matchups?selectedDate={}'.format(start_date.strftime('%Y-%m-%d'))
 
-print(data)
+file = 'file.csv'
+bucket = 's3-bucket'
 
+buffer = StringIO()
+data.to_csv(buffer)
+
+client = boto3.client('s3')
+response = client.put_object(
+    ACL = 'private',
+    Body = buffer.getvalue(),
+    Bucket = bucket,
+    Key = file
+)
+#print(response)
 
 
